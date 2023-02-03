@@ -24,6 +24,18 @@ namespace SkiaSharp.Tests
 			recorder.Dispose();
 		}
 
+		[SkippableFact
+		public void CanCreateRecorderWithRTreeAndDrawOnCanvas()
+		{
+			var recorder = new SKPictureRecorder();
+
+			var canvas = recorder.BeginRecording(SKRect.Create(100, 100), true);
+			canvas.DrawColor(SKColors.Blue);
+			canvas.Dispose();
+
+			recorder.Dispose();
+		}
+
 		[SkippableFact]
 		public void CanCreateFromRecorder()
 		{
@@ -31,6 +43,24 @@ namespace SkiaSharp.Tests
 
 			using (var recorder = new SKPictureRecorder())
 			using (var canvas = recorder.BeginRecording(cullRect))
+			{
+				canvas.DrawColor(SKColors.Blue);
+
+				using (var drawable = recorder.EndRecordingAsDrawable())
+				{
+					Assert.NotNull(drawable);
+					Assert.Equal(cullRect, drawable.Bounds);
+				}
+			}
+		}
+
+		[SkippableFact]
+		public void CanCreateFromRecorderWithRTree()
+		{
+			var cullRect = SKRect.Create(100, 100);
+
+			using (var recorder = new SKPictureRecorder())
+			using (var canvas = recorder.BeginRecording(cullRect, true))
 			{
 				canvas.DrawColor(SKColors.Blue);
 
