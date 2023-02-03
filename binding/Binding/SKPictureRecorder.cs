@@ -23,9 +23,14 @@ namespace SkiaSharp
 		protected override void DisposeNative () =>
 			SkiaApi.sk_picture_recorder_delete (Handle);
 
-		public SKCanvas BeginRecording (SKRect cullRect)
+		public SKCanvas BeginRecording (SKRect cullRect, bool useRTree = false)
 		{
-			return OwnedBy (SKCanvas.GetObject (SkiaApi.sk_picture_recorder_begin_recording (Handle, &cullRect), false), this);
+			if (useRTree) {
+				var rTreeFactory = OwnedBy (SKCanvas.GetObject (SkiaApi.sk_rtree_factory_new (), true), this);
+				return OwnedBy (SKCanvas.GetObject (SkiaApi.sk_picture_recorder_begin_recording_with_bbh_factory (Handle, &cullRect, rTreeFactory), false), this);
+			} else {
+				return OwnedBy (SKCanvas.GetObject (SkiaApi.sk_picture_recorder_begin_recording (Handle, &cullRect), false), this);
+			}
 		}
 
 		public SKPicture EndRecording ()
